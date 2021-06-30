@@ -5,12 +5,12 @@ class ClientController {
     const { name, cellphoneNumber, email, password } = req.body
 
     // Validate if email already exists
-    const data = await Client.findOne({ email })
-    if (data !== null) {
+    const userExists = await Client.findOne({ where: { email } })
+    if (userExists) {
       res.statusCode = 400
       res.json({
-        status: false,
-        msg: 'O e-mail já pertence a outra conta'
+        status: true,
+        msg: 'E-mail pertence a outra conta'
       })
     }
 
@@ -58,6 +58,32 @@ class ClientController {
       res.json({
         status: false,
         msg: 'Nenhum cliente registrado.'
+      })
+    }
+  }
+
+  async getSingle (req, res) {
+    const { id } = req.params
+    try {
+      const client = await Client.findByPk(id)
+      if (client) {
+        res.statusCode = 200
+        res.json({
+          status: true,
+          client
+        })
+      } else {
+        res.statusCode = 404
+        res.json({
+          status: false,
+          msg: 'Cliente não encontrado'
+        })
+      }
+    } catch (err) {
+      res.statusCode = 404
+      res.json({
+        status: false,
+        msg: 'Algo deu errado, cliente não encontrado'
       })
     }
   }
