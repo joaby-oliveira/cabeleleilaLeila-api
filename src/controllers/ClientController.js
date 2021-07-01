@@ -1,4 +1,6 @@
 const bcrypt = require('bcrypt')
+const jwt = require('jsonwebtoken')
+
 const Client = require('../models/Client')
 
 class ClientController {
@@ -99,15 +101,34 @@ class ClientController {
     if (client) {
       const validPassword = await bcrypt.compare(password, client.password)
       if (validPassword) {
-        // res.statusCode = 200
-        // res.json({
-        //   token: 'E-mail ou senha errados'
-        // })
+        const jwtSecret = 'testnewjwtpassword'
+        jwt.sign({ id: client.id, email: client.email }, jwtSecret, { expiresIn: '48h' }, (err, token) => {
+          if (err) {
+            res.statusCode = 400
+            res.json({
+              status: false,
+              err: 'Não foi possível autenticar'
+            })
+            return false
+          } else {
+            res.statusCode = 200
+            res.json({
+              status: true,
+              msg: 'Autenticação bem sucedida!',
+              token
+            })
+          }
+        })
+      } else {
+        res.statusCode = 404
+        res.json({
+          msg: 'E-mail ou senha incorretos'
+        })
       }
     } else {
       res.statusCode = 404
       res.json({
-        msg: 'E-mail ou senha errados'
+        msg: 'E-mail ou senha incorretos'
       })
     }
   }
