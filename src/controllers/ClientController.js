@@ -12,6 +12,7 @@ class ClientController {
         status: true,
         msg: 'E-mail pertence a outra conta'
       })
+      return
     }
 
     try {

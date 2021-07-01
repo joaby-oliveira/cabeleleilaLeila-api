@@ -1,7 +1,9 @@
 const Sequelize = require('sequelize')
 const db = require('../database/database')
 
-const Client = db.define('users', {
+const Schedule = require('./Schedule')
+
+const Client = db.define('clients', {
   id: {
     type: Sequelize.INTEGER,
     autoIncrement: true,
@@ -27,7 +29,10 @@ const Client = db.define('users', {
   }
 })
 
-db.sync({ force: true })
+Client.hasMany(Schedule)
+Schedule.belongsTo(Client)
+
+db.sync({ force: false })
   .then(result => {
   })
   .catch(err => {

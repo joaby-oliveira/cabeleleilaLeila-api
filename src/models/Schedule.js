@@ -8,6 +8,10 @@ const Schedule = db.define('schedules', {
     allowNull: false,
     primaryKey: true
   },
+  service: {
+    type: Sequelize.STRING,
+    allowNull: false
+  },
   date: {
     type: Sequelize.DATEONLY,
     allowNull: false
@@ -21,8 +25,7 @@ const Schedule = db.define('schedules', {
     allowNull: false
   }
 })
-
-db.sync({ force: true })
+db.sync({ force: false })
   .then(result => {
   })
   .catch(err => {
