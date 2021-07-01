@@ -3,32 +3,14 @@ const Schedule = require('../models/Schedule')
 class ScheduleController {
   async create (req, res) {
     const { service, date, startingTime, endingTime, clientId } = req.body
-    let dateIsNear = ''
     // Validate if email already exists
     const scheduleExists = await Schedule.findOne({ where: { date, startingTime, endingTime } })
     if (scheduleExists) {
       res.statusCode = 400
       res.json({
-        status: true,
+        status: false,
         msg: 'Horário já agendado, escolha outro horário'
       })
-
-      const nowTime = new Date().getTime()
-      const clientAppointments = await Schedule.findAll({ where: { clientId } })
-      if (clientAppointments.length > 0) {
-        const nearAppointmentDate = clientAppointments[clientAppointments.length - 1].date
-        const nearAppointmentTime = new Date(nearAppointmentDate).getTime()
-
-        console.log(nearAppointmentDate)
-        console.log(new Date())
-
-        const weekToMilisecond = 604800017
-        if (nearAppointmentTime - nowTime > weekToMilisecond) {
-          dateIsNear = 'Mais de uma semana'
-        } else {
-          dateIsNear = 'Menos de uma semana'
-        }
-      }
     }
 
     try {
@@ -39,6 +21,19 @@ class ScheduleController {
         endingTime,
         clientId
       })
+      let dateIsNear
+      const nowTime = new Date().getTime()
+      const clientAppointments = await Schedule.findAll({ where: { clientId } })
+      if (clientAppointments.length > 0) {
+        const nearAppointmentDate = clientAppointments[clientAppointments.length - 1].date
+        const nearAppointmentTime = new Date(nearAppointmentDate).getTime()
+        const weekToMilisecond = 604800017
+        if (nearAppointmentTime - nowTime < weekToMilisecond) {
+          dateIsNear = true
+        } else {
+          dateIsNear = false
+        }
+      }
 
       res.statusCode = 201
       res.json({
