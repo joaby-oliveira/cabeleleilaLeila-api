@@ -1,3 +1,4 @@
+const bcrypt = require('bcrypt')
 const Client = require('../models/Client')
 
 class ClientController {
@@ -16,11 +17,13 @@ class ClientController {
     }
 
     try {
+      const salt = bcrypt.genSaltSync(10)
+      const hashedPassword = bcrypt.hashSync(password, salt)
       await Client.create({
         name,
         cellphoneNumber,
         email,
-        password
+        password: hashedPassword
       })
 
       res.statusCode = 201
@@ -85,6 +88,26 @@ class ClientController {
       res.json({
         status: false,
         msg: 'Algo deu errado, cliente não encontrado'
+      })
+    }
+  }
+
+  async login (req, res) {
+    const { email, password } = req.body
+    const client = await Client.findOne({ where: { email } })
+
+    if (client) {
+      const validPassword = await bcrypt.compare(password, client.password)
+      if (validPassword) {
+        // res.statusCode = 200
+        // res.json({
+        //   token: 'E-mail ou senha errados'
+        // })
+      }
+    } else {
+      res.statusCode = 404
+      res.json({
+        msg: 'E-mail ou senha errados'
       })
     }
   }
