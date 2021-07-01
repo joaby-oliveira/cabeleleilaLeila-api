@@ -46,12 +46,22 @@ class ClientController {
 
   async getAll (req, res) {
     try {
-      const data = await Client.findAll()
-      if (data.length !== 0) {
+      let clients
+      if (req.loggedUser.adm) {
+        clients = await Client.findAll()
+      } else {
+        res.statusCode = 403
+        res.json({
+          status: false,
+          msg: 'Permissão negada'
+        })
+        return
+      }
+      if (clients.length !== 0) {
         res.statusCode = 200
         res.json({
           status: true,
-          data
+          clients
         })
       } else {
         res.statusCode = 401
@@ -72,7 +82,17 @@ class ClientController {
   async getSingle (req, res) {
     const { id } = req.params
     try {
-      const client = await Client.findByPk(id)
+      let client
+      if (req.loggedUser.adm) {
+        client = await Client.findByPk(id)
+      } else {
+        res.statusCode = 403
+        res.json({
+          status: false,
+          msg: 'Permissão negada'
+        })
+        return
+      }
       if (client) {
         res.statusCode = 200
         res.json({
@@ -102,7 +122,7 @@ class ClientController {
     if (client) {
       const validPassword = await bcrypt.compare(password, client.password)
       if (validPassword) {
-        jwt.sign({ id: client.id, email: client.email }, process.env.JWTSECRET, { expiresIn: '48h' }, (err, token) => {
+        jwt.sign({ id: client.id, email: client.email, adm: client.adm }, process.env.JWTSECRET, { expiresIn: '48h' }, (err, token) => {
           if (err) {
             res.statusCode = 400
             res.json({

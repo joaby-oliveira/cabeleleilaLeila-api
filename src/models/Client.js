@@ -26,6 +26,10 @@ const Client = db.define('clients', {
   password: {
     type: Sequelize.STRING,
     allowNull: false
+  },
+  adm: {
+    type: Sequelize.BOOLEAN,
+    defaultValue: false
   }
 })
 

@@ -2,8 +2,7 @@ const Schedule = require('../models/Schedule')
 
 class ScheduleController {
   async create (req, res) {
-    const { service, date, startingTime, endingTime, clientId } = req.body
-    // Validate if email already exists
+    const { service, date, startingTime, endingTime } = req.body
     const scheduleExists = await Schedule.findOne({ where: { date, startingTime, endingTime } })
     if (scheduleExists) {
       res.statusCode = 400
@@ -19,11 +18,11 @@ class ScheduleController {
         date,
         startingTime,
         endingTime,
-        clientId
+        clientId: req.loggedUser.id
       })
       let dateIsNear
       const nowTime = new Date().getTime()
-      const clientAppointments = await Schedule.findAll({ where: { clientId } })
+      const clientAppointments = await Schedule.findAll({ where: { clientId: req.loggedUser.id } })
       if (clientAppointments.length > 0) {
         const nearAppointmentDate = clientAppointments[clientAppointments.length - 1].date
         const nearAppointmentTime = new Date(nearAppointmentDate).getTime()
@@ -53,7 +52,13 @@ class ScheduleController {
 
   async getAll (req, res) {
     try {
-      const data = await Schedule.findAll()
+      console.log(req.loggedUser.adm)
+      let data
+      if (req.loggedUser.adm) {
+        data = await Schedule.findAll()
+      } else {
+        data = await Schedule.findAll({ where: { clientId: req.loggedUser.id } })
+      }
       if (data.length !== 0) {
         res.statusCode = 200
         res.json({
@@ -61,7 +66,7 @@ class ScheduleController {
           data
         })
       } else {
-        res.statusCode = 401
+        res.statusCode = 404
         res.json({
           status: false,
           msg: 'Nenhum agendamento foi realizado.'
@@ -71,7 +76,7 @@ class ScheduleController {
       res.statusCode = 404
       res.json({
         status: false,
-        msg: 'Nenhum cliente registrado.'
+        msg: 'Não foi possível buscar agendamentos.'
       })
     }
   }
@@ -79,7 +84,7 @@ class ScheduleController {
   async delete (req, res) {
     const { id } = req.params
     try {
-      const deleted = await Schedule.destroy({ where: { id } })
+      const deleted = await Schedule.destroy({ where: { id, clientId: req.loggedUser.id } })
       console.log(deleted)
       if (deleted) {
         res.statusCode = 200
@@ -92,7 +97,7 @@ class ScheduleController {
         res.statusCode = 400
         res.json({
           status: false,
-          msg: 'Id informado não existe'
+          msg: 'Não foi possível excluír a tarefa'
         })
         return
       }
@@ -114,7 +119,7 @@ class ScheduleController {
       try {
         const edited = await Schedule.update(
           { service, date, startingTime, endingTime },
-          { where: { id } }
+          { where: { clientId: req.loggedUser.id, id } }
         )
         if (edited[0] === 1) {
           res.statusCode = 200
