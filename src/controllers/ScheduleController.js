@@ -106,7 +106,50 @@ class ScheduleController {
       res.statusCode = 400
       res.json({
         status: false,
-        msg: 'Não foi possível deletar agendamento'
+        msg: 'Não foi possível deletar o agendamento'
+      })
+    }
+  }
+
+  async update (req, res) {
+    const { service, date, startingTime, endingTime } = req.body
+    const { id } = req.params
+    const appointmentExists = await Schedule.findByPk(id)
+    if (appointmentExists) {
+      try {
+        const edited = await Schedule.update(
+          { service, date, startingTime, endingTime },
+          { where: { id } }
+        )
+        if (edited[0] === 1) {
+          res.statusCode = 200
+          res.json({
+            status: true,
+            msg: 'Agendamento atualizado'
+          })
+          return true
+        } else {
+          res.statusCode = 400
+          res.json({
+            status: false,
+            msg: 'Não foi possível editar o agendamento'
+          })
+          return false
+        }
+      } catch (err) {
+        console.log(err)
+        res.statusCode = 400
+        res.json({
+          status: false,
+          msg: 'Não foi possível editar o agendamento'
+        })
+        return false
+      }
+    } else {
+      res.statusCode = 400
+      res.json({
+        status: false,
+        msg: 'O agendamento não existe'
       })
     }
   }

@@ -13,6 +13,7 @@ router.post('/schedule', Schedule.create)
 
 router.get('/schedule', Schedule.getAll)
 router.delete('/schedule/:id', Schedule.delete)
+router.put('/schedule/:id', Schedule.update)
 // router.post('/client/auth', Client.login)
 
 module.exports = router
