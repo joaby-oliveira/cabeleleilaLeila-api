@@ -1,11 +1,11 @@
 const Sequelize = require('sequelize')
 const sequelize = new Sequelize(
-  'cabeleleila_leila',
-  'postgres',
-  '123456',
+  process.env.DB_NAME,
+  process.env.DB_USER,
+  process.env.DB_PASSWORD,
   {
-    dialect: 'postgres',
-    host: 'localhost'
+    dialect: process.env.DB_DIALECT,
+    host: process.env.DB_HOST
   }
 )
 module.exports = sequelize

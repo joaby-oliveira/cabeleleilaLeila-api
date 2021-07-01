@@ -1,3 +1,4 @@
+require('dotenv').config()
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 
@@ -12,7 +13,7 @@ class ClientController {
     if (userExists) {
       res.statusCode = 400
       res.json({
-        status: true,
+        status: false,
         msg: 'E-mail pertence a outra conta'
       })
       return
@@ -101,8 +102,7 @@ class ClientController {
     if (client) {
       const validPassword = await bcrypt.compare(password, client.password)
       if (validPassword) {
-        const jwtSecret = 'testnewjwtpassword'
-        jwt.sign({ id: client.id, email: client.email }, jwtSecret, { expiresIn: '48h' }, (err, token) => {
+        jwt.sign({ id: client.id, email: client.email }, process.env.JWTSECRET, { expiresIn: '48h' }, (err, token) => {
           if (err) {
             res.statusCode = 400
             res.json({
