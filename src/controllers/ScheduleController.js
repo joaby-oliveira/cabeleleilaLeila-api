@@ -80,6 +80,36 @@ class ScheduleController {
       })
     }
   }
+
+  async delete (req, res) {
+    const { id } = req.params
+    try {
+      const deleted = await Schedule.destroy({ where: { id } })
+      console.log(deleted)
+      if (deleted) {
+        res.statusCode = 200
+        res.json({
+          status: true,
+          msg: 'Agendamento deletado com sucesso'
+        })
+        return
+      } else {
+        res.statusCode = 400
+        res.json({
+          status: false,
+          msg: 'Id informado não existe'
+        })
+        return
+      }
+    } catch (err) {
+      console.log(err)
+      res.statusCode = 400
+      res.json({
+        status: false,
+        msg: 'Não foi possível deletar agendamento'
+      })
+    }
+  }
 }
 
 module.exports = new ScheduleController()
